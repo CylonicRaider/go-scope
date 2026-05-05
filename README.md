@@ -1,7 +1,4 @@
-[![Build Status](https://travis-ci.org/euphoria-io/scope.png)](https://travis-ci.org/euphoria-io/scope)
-[![GoDoc](https://godoc.org/euphoria.io/scope?status.svg)](http://godoc.org/euphoria.io/scope)
-
----
+# scope
 
 Package scope provides context objects for the sharing of scope across
 goroutines. This context object provides a number of utilities for
