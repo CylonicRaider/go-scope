@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"euphoria.io/scope"
+	"github.com/cylonicraider/go-scope/scope"
 )
 
 func ExampleBreakpointer() {
