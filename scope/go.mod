@@ -1,4 +1,4 @@
-module github.com/cylonicraider/go-scope/scope
+module euphoria.leet.nu/lib/scope
 
 go 1.26.2
 
