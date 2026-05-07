@@ -1,14 +1,12 @@
-package scope_test
+package scope
 
 import (
 	"fmt"
 	"time"
-
-	"github.com/cylonicraider/go-scope/scope"
 )
 
 func ExampleBreakpointer() {
-	root := scope.New()
+	root := New()
 
 	// A function that returns an error, which we want to simulate.
 	output := func(arg string) error {
@@ -17,7 +15,7 @@ func ExampleBreakpointer() {
 	}
 
 	// A function that we want to test the error handling of.
-	verifyOutput := func(ctx scope.Context, arg string) error {
+	verifyOutput := func(ctx Context, arg string) error {
 		if err := ctx.Check("output()", arg); err != nil {
 			return err
 		}
@@ -58,10 +56,10 @@ func ExampleBreakpointer() {
 }
 
 func ExampleContext_cancellation() {
-	ctx := scope.New()
+	ctx := New()
 
 	go func() {
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(45 * time.Millisecond)
 		ctx.Cancel()
 	}()
 
