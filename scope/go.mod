@@ -9,5 +9,3 @@ require (
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/smarty/assertions v1.15.0 // indirect
 )
-
-retract [v0.0.1, v0.0.4]
