@@ -71,7 +71,7 @@ scope. When a context is forked, the child context shares the same data map
 as its parent.
 
 This data store maps blank interfaces to blank interfaces, in the exact
-same manner as http://www.gorillatoolkit.org/pkg/context. This means you
+same manner as https://www.gorillatoolkit.org/pkg/context. This means you
 must use type assertions at runtime. To keep this reasonably safe, it's
 recommended to define and use your own unexported type for all keys maintained
 by your package.
@@ -129,13 +129,13 @@ Check() call, and then write back an error to synchronize with the exit.
 
 	func TestGetError(t *testing.T) {
 		ctx := scope.New()
-		ctrl := ctx.Breakpoint("http.Get", "http://google.com")
+		ctrl := ctx.Breakpoint("http.Get", "https://google.com")
 		testErr := fmt.Errorf("test error")
 		go func() {
 			<-ctrl
 			ctrl <- testErr
 		}()
-		if err := Get(ctx, "http://google.com"); err != testErr {
+		if err := Get(ctx, "https://google.com"); err != testErr {
 			t.Fail()
 		}
 	}
