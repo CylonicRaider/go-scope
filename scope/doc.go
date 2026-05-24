@@ -3,7 +3,7 @@ Package scope provides context objects for the sharing of scope across
 goroutines. This context object provides a number of utilities for
 coordinating concurrent work, in addition to sharing data.
 
-Lifecycle
+# Lifecycle
 
 Contexts are nodes in a tree. A context is born either by forking from
 an existing context (becoming a child of that node in the tree), or a
@@ -64,7 +64,7 @@ You can also spot-check for termination with a call to the Alive() method.
 		readChunk()
 	}
 
-Data Sharing
+# Data Sharing
 
 Contexts provide a data store for key value pairs, shared across the entire
 scope. When a context is forked, the child context shares the same data map
@@ -97,7 +97,7 @@ parent's data map. When Set() is called on the child, the original map
 is duplicated for the child, and the update is only applied to the child's
 map.
 
-Common WaitGroup
+# Common WaitGroup
 
 Each context provides a WaitGroup() method, which returns the same pointer
 across the entire tree. You can use this to spin off background tasks and
@@ -110,7 +110,7 @@ then wait for them before you completely shut down the scope.
 	}()
 	ctx.WaitGroup().Wait()
 
-Breakpoints
+# Breakpoints
 
 Contexts provide an optional feature to facilitate unit testing, called
 breakpoints. A breakpoint is identified by a list of hashable values.
