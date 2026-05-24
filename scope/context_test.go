@@ -1,12 +1,16 @@
 package scope
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
 
 	. "github.com/smartystreets/goconvey/convey"
 )
+
+// Go does still not allow declaring that a type shall implement an interface.
+var _ context.Context = New()
 
 func TestContext(t *testing.T) {
 	Convey("Context data", t, func() {
@@ -141,12 +145,32 @@ func TestContext(t *testing.T) {
 	})
 
 	Convey("Timeout", t, func() {
+		Convey("No deadline without timeout", func() {
+			ctx := New()
+			_, ok := ctx.Deadline()
+			So(ok, ShouldBeFalse)
+		})
+
 		Convey("Timeout expires", func() {
 			start := time.Now()
 			ctx := New().ForkWithTimeout(10 * time.Millisecond)
 			<-ctx.Done()
 			So(time.Now().Sub(start), ShouldBeGreaterThanOrEqualTo, 10*time.Millisecond)
 			So(ctx.Err(), ShouldEqual, TimedOut)
+		})
+
+		Convey("Timeout sets deadline", func() {
+			start := time.Now()
+			ctx := New().ForkWithTimeout(10 * time.Millisecond)
+			dl1, ok := ctx.Deadline()
+			So(ok, ShouldBeTrue)
+			So(dl1.UnixNano(), ShouldAlmostEqual, start.Add(10*time.Millisecond).UnixNano(), 100000)
+			<-ctx.Done()
+			end := time.Now()
+			dl2, ok := ctx.Deadline()
+			So(ok, ShouldBeTrue)
+			So(dl2, ShouldEqual, dl1)
+			So(end.Sub(start), ShouldBeGreaterThanOrEqualTo, 10*time.Millisecond)
 		})
 
 		Convey("Context terminates before expiration", func() {

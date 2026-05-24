@@ -45,6 +45,13 @@ type Context interface {
 	// the given duration (unless the context terminates first).
 	ForkWithTimeout(time.Duration) Context
 
+	// Deadline returns the time, if any, at which the context will reach
+	// its timeout. If the bool is false, this context has no timeout.
+	Deadline() (time.Time, bool)
+
+	// Value does the same as Get() for compatibility with context.Context.
+	Value(key interface{}) interface{}
+
 	// Get returns the value associated with the given key. If this context
 	// has had no values set, then the lookup is made on the nearest ancestor
 	// with data. If no value is found, an unboxed nil value is returned.
@@ -93,6 +100,7 @@ type ContextTree struct {
 	m        sync.RWMutex
 	termed   bool
 	done     chan struct{}
+	deadline time.Time
 	err      error
 	data     kvmap
 	aliased  *ContextTree
@@ -163,8 +171,10 @@ func (ctx *ContextTree) Fork() Context {
 // one. It also spins off a timer which will cancel the context after
 // the given duration (unless the context terminates first).
 func (ctx *ContextTree) ForkWithTimeout(dur time.Duration) Context {
+	deadline := time.Now().Add(dur)
 	timer := time.NewTimer(dur)
 	child := ctx.Fork()
+	child.(*ContextTree).deadline = deadline
 	go func() {
 		select {
 		case <-child.Done():
@@ -174,6 +184,22 @@ func (ctx *ContextTree) ForkWithTimeout(dur time.Duration) Context {
 		}
 	}()
 	return child
+}
+
+// Deadline returns the time, if any, at which the context will reach
+// its timeout. If the bool is false, this context has no timeout.
+func (ctx *ContextTree) Deadline() (time.Time, bool) {
+	if ctx.deadline.IsZero() {
+		return time.Time{}, false
+	} else {
+		return ctx.deadline, true
+	}
+}
+
+// Value does the same as Get() for compatibility with context.Context.
+func (ctx *ContextTree) Value(key interface{}) interface{} {
+	val, _ := ctx.GetOK(key)
+	return val
 }
 
 // Get returns the value associated with the given key. If this context
