@@ -156,6 +156,7 @@ func (ctx *ContextTree) Fork() Context {
 	child := &ContextTree{
 		wg:       ctx.wg,
 		done:     make(chan struct{}),
+		deadline: ctx.deadline,
 		children: map[*ContextTree]struct{}{},
 	}
 	if ctx.aliased == nil {
@@ -172,7 +173,10 @@ func (ctx *ContextTree) Fork() Context {
 // the given duration (unless the context terminates first).
 func (ctx *ContextTree) ForkWithTimeout(dur time.Duration) Context {
 	deadline := time.Now().Add(dur)
-	timer := time.NewTimer(dur)
+	if !ctx.deadline.IsZero() && deadline.After(ctx.deadline) {
+		return ctx.Fork()
+	}
+	timer := time.NewTimer(deadline.Sub(time.Now()))
 	child := ctx.Fork()
 	child.(*ContextTree).deadline = deadline
 	go func() {

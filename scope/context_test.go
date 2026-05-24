@@ -145,12 +145,6 @@ func TestContext(t *testing.T) {
 	})
 
 	Convey("Timeout", t, func() {
-		Convey("No deadline without timeout", func() {
-			ctx := New()
-			_, ok := ctx.Deadline()
-			So(ok, ShouldBeFalse)
-		})
-
 		Convey("Timeout expires", func() {
 			start := time.Now()
 			ctx := New().ForkWithTimeout(10 * time.Millisecond)
@@ -179,6 +173,40 @@ func TestContext(t *testing.T) {
 			ctx.Terminate(nil)
 			time.Sleep(10 * time.Millisecond)
 			So(ctx.Err(), ShouldBeNil)
+		})
+	})
+
+	Convey("Deadline", t, func() {
+		Convey("Blank context has no deadline", func() {
+			ctx := New()
+			_, ok := ctx.Deadline()
+			So(ok, ShouldBeFalse)
+		})
+
+		Convey("Forking propagates deadline", func() {
+			ctx := New().ForkWithTimeout(10 * time.Millisecond)
+			child := ctx.Fork()
+			dlp, ok := ctx.Deadline()
+			So(ok, ShouldBeTrue)
+			dlc, ok := child.Deadline()
+			So(ok, ShouldBeTrue)
+			So(dlc, ShouldEqual, dlp)
+		})
+
+		Convey("Child cannot escape parent deadline", func() {
+			start := time.Now()
+			ctx := New().ForkWithTimeout(10 * time.Millisecond)
+			child := ctx.ForkWithTimeout(100 * time.Millisecond)
+			dlp, ok := ctx.Deadline()
+			So(ok, ShouldBeTrue)
+			dlc, ok := child.Deadline()
+			So(ok, ShouldBeTrue)
+			So(dlc, ShouldEqual, dlp)
+			<-ctx.Done()
+			end := time.Now()
+			So(ctx.Err(), ShouldEqual, TimedOut)
+			So(child.Err(), ShouldEqual, TimedOut)
+			So(end.Sub(start), ShouldAlmostEqual, 10*time.Millisecond, 1*time.Millisecond)
 		})
 	})
 }
