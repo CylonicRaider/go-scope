@@ -138,23 +138,23 @@ func TestContext(t *testing.T) {
 				So(<-ch, ShouldEqual, Cancelled)
 			})
 		})
+	})
 
-		Convey("Timeout", func() {
-			Convey("Timeout expires", func() {
-				start := time.Now()
-				ctx := New().ForkWithTimeout(10 * time.Millisecond)
-				<-ctx.Done()
-				So(time.Now().Sub(start), ShouldBeGreaterThanOrEqualTo, 10*time.Millisecond)
-				So(ctx.Err(), ShouldEqual, TimedOut)
-			})
+	Convey("Timeout", t, func() {
+		Convey("Timeout expires", func() {
+			start := time.Now()
+			ctx := New().ForkWithTimeout(10 * time.Millisecond)
+			<-ctx.Done()
+			So(time.Now().Sub(start), ShouldBeGreaterThanOrEqualTo, 10*time.Millisecond)
+			So(ctx.Err(), ShouldEqual, TimedOut)
+		})
 
-			Convey("Context terminates before expiration", func() {
-				ctx := New().ForkWithTimeout(10 * time.Millisecond)
-				time.Sleep(5 * time.Millisecond)
-				ctx.Terminate(nil)
-				time.Sleep(10 * time.Millisecond)
-				So(ctx.Err(), ShouldBeNil)
-			})
+		Convey("Context terminates before expiration", func() {
+			ctx := New().ForkWithTimeout(10 * time.Millisecond)
+			time.Sleep(5 * time.Millisecond)
+			ctx.Terminate(nil)
+			time.Sleep(10 * time.Millisecond)
+			So(ctx.Err(), ShouldBeNil)
 		})
 	})
 }
