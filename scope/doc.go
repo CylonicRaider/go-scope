@@ -139,5 +139,14 @@ Check() call, and then write back an error to synchronize with the exit.
 			t.Fail()
 		}
 	}
+
+# Standard library compatibility
+
+scope.Context is drop-in compatible with the standard library's
+context.Context. The data sharing API integrates seamlessly with the Value()
+API (note, however, that code using the standard library Context might not
+expect a value changing when after it is set). A timeout translates to a
+deadline for standard-library child contexts. The common WaitGroup and
+breakpoints have no standard-library equivalents.
 */
 package scope
